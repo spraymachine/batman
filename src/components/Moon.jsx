@@ -19,13 +19,14 @@ export default function Moon() {
         right: '15%',
         width: '100px',
         height: '100px',
-        zIndex: 100,
+        zIndex: 9999, // Ensure it's on top of all content including images
         pointerEvents: 'none',
       }}
       aria-hidden="true"
     >
       {/* Moon surface */}
       <div
+        className="moon-surface"
         style={{
           position: 'absolute',
           width: '100%',

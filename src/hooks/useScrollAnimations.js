@@ -23,6 +23,10 @@ export default function useScrollAnimations() {
       const moon = document.getElementById('moon');
 
       if (sun && moon) {
+        // Get inner elements for spinning
+        const sunCore = sun.querySelector('.sun-core');
+        const moonSurface = moon.querySelector('.moon-surface');
+
         // Sun and Moon drop timeline - tied to landing section scroll
         gsap.timeline({
           scrollTrigger: {
@@ -36,15 +40,40 @@ export default function useScrollAnimations() {
         .to(sun, {
           y: window.innerHeight * 0.6, // Fall 60% of viewport
           x: -50, // Slightly left
-          rotation: 180, // Sun rotates
           ease: 'linear',
         }, 0)
         .to(moon, {
           y: window.innerHeight * 0.6, // Fall 60% of viewport
           x: 50, // Slightly right
-          rotation: -180, // Moon counter-rotates
           ease: 'linear',
         }, 0);
+
+        // Add continuous spinning tied to scroll for entire page
+        if (sunCore && moonSurface) {
+          gsap.to(sunCore, {
+            rotation: 360 * 3, // 3 full rotations across entire page
+            ease: 'none',
+            scrollTrigger: {
+              trigger: 'body',
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 0.5, // Smooth scrubbing
+              markers: false,
+            },
+          });
+
+          gsap.to(moonSurface, {
+            rotation: -360 * 3, // 3 full rotations opposite direction
+            ease: 'none',
+            scrollTrigger: {
+              trigger: 'body',
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 0.5, // Smooth scrubbing
+              markers: false,
+            },
+          });
+        }
       }
 
       // ============================================
@@ -52,81 +81,185 @@ export default function useScrollAnimations() {
       // ============================================
       const leftCubes = document.querySelectorAll('.cube-left .cube');
       const rightCubes = document.querySelectorAll('.cube-right .cube');
+      const isMobile = window.innerWidth <= 768;
 
       if (leftCubes.length > 0 || rightCubes.length > 0) {
-        // Single timeline for all cubes
-        const cubeTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: '#portfolio',
-            start: 'top 80%',
-            end: 'bottom 20%',
-            scrub: true,
-            markers: false,
-          },
-        });
+        if (isMobile) {
+          // MOBILE: "X" Pattern Animation
+          // Left cubes: left → center → right
+          // Right cubes: right → center → left
+          
+          const cubeTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: '#portfolio',
+              start: 'top 80%',
+              end: 'bottom 20%',
+              scrub: true,
+              markers: false,
+            },
+          });
 
-        // Left cubes: Come from left with rotation
-        leftCubes.forEach((cube, index) => {
-          cubeTimeline.fromTo(
-            cube,
-            {
-              x: -window.innerWidth * 0.5, // Start off-screen left
-              rotateY: -60,
-              opacity: 0,
-            },
-            {
-              x: 0,
-              rotateY: 0,
-              opacity: 1,
-              ease: 'power2.out',
-              duration: 1,
-            },
-            index * 0.15 // Stagger delay
-          );
-        });
+          leftCubes.forEach((cube, index) => {
+            // Left cubes cross from left to right through center
+            cubeTimeline.fromTo(
+              cube,
+              {
+                x: -window.innerWidth * 0.8, // Start further left
+                rotateY: -90,
+                opacity: 0,
+              },
+              {
+                keyframes: [
+                  // Move to center first
+                  { x: 0, rotateY: 0, opacity: 1, duration: 0.5 },
+                  // Continue to right
+                  { x: window.innerWidth * 0.8, rotateY: 90, opacity: 0, duration: 0.5 }
+                ],
+                ease: 'power1.inOut',
+              },
+              index * 0.15 // Stagger delay
+            );
+          });
 
-        // Right cubes: Come from right with rotation
-        rightCubes.forEach((cube, index) => {
-          cubeTimeline.fromTo(
-            cube,
-            {
-              x: window.innerWidth * 0.5, // Start off-screen right
-              rotateY: 60,
-              opacity: 0,
+          rightCubes.forEach((cube, index) => {
+            // Right cubes cross from right to left through center
+            cubeTimeline.fromTo(
+              cube,
+              {
+                x: window.innerWidth * 0.8, // Start further right
+                rotateY: 90,
+                opacity: 0,
+              },
+              {
+                keyframes: [
+                  // Move to center first
+                  { x: 0, rotateY: 0, opacity: 1, duration: 0.5 },
+                  // Continue to left
+                  { x: -window.innerWidth * 0.8, rotateY: -90, opacity: 0, duration: 0.5 }
+                ],
+                ease: 'power1.inOut',
+              },
+              index * 0.15 // Stagger delay
+            );
+          });
+        } else {
+          // DESKTOP: Original Animation (cubes stop at center)
+          const cubeTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: '#portfolio',
+              start: 'top 80%',
+              end: 'bottom 20%',
+              scrub: true,
+              markers: false,
             },
-            {
-              x: 0,
-              rotateY: 0,
-              opacity: 1,
-              ease: 'power2.out',
-              duration: 1,
-            },
-            index * 0.15 // Stagger delay
-          );
-        });
+          });
+
+          // Left cubes: Come from left with rotation
+          leftCubes.forEach((cube, index) => {
+            cubeTimeline.fromTo(
+              cube,
+              {
+                x: -window.innerWidth * 0.5, // Start off-screen left
+                rotateY: -60,
+                opacity: 0,
+              },
+              {
+                x: 0,
+                rotateY: 0,
+                opacity: 1,
+                ease: 'power2.out',
+                duration: 1,
+              },
+              index * 0.15 // Stagger delay
+            );
+          });
+
+          // Right cubes: Come from right with rotation
+          rightCubes.forEach((cube, index) => {
+            cubeTimeline.fromTo(
+              cube,
+              {
+                x: window.innerWidth * 0.5, // Start off-screen right
+                rotateY: 60,
+                opacity: 0,
+              },
+              {
+                x: 0,
+                rotateY: 0,
+                opacity: 1,
+                ease: 'power2.out',
+                duration: 1,
+              },
+              index * 0.15 // Stagger delay
+            );
+          });
+        }
       }
 
       // ============================================
-      // 3. ABOUT SECTION - Stats Animation
+      // 3. ABOUT SECTION - Sun & Moon Converge to Image Bottom
       // ============================================
-      const statsCards = document.querySelectorAll('.stat-card');
-
-      if (statsCards.length > 0) {
-        const isMobile = window.innerWidth <= 480;
+      if (sun && moon) {
+        const aboutImage = document.querySelector('.about-image');
+        const aboutSection = document.getElementById('about');
         
-        // Stats animate from bottom with stagger
+        if (aboutImage && aboutSection) {
+          // Sun and Moon gradually converge to center and move to bottom 2/3 of image
+          // This happens throughout the About section scroll
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: '#about',
+              start: 'top bottom', // Start as About enters viewport
+              end: 'center center', // End when About center reaches viewport center
+              scrub: true,
+              markers: false,
+            },
+          })
+          .to(sun, {
+            x: -60, // Position to left of center (side by side with moon)
+            y: () => {
+              // Calculate Y position for bottom 2/3 of the image
+              const aboutTop = aboutSection.offsetTop;
+              const imageHeight = 500; // Image height from About.jsx
+              const viewportHeight = window.innerHeight;
+              // Position at bottom third of image (2/3 down from top of image)
+              return aboutTop - viewportHeight / 2 + imageHeight * (2/3);
+            },
+            ease: 'power2.inOut',
+          }, 0)
+          .to(moon, {
+            x: 60, // Position to right of center (side by side with sun)
+            y: () => {
+              // Calculate Y position for bottom 2/3 of the image
+              const aboutTop = aboutSection.offsetTop;
+              const imageHeight = 500; // Image height from About.jsx
+              const viewportHeight = window.innerHeight;
+              // Position at bottom third of image (2/3 down from top of image)
+              return aboutTop - viewportHeight / 2 + imageHeight * (2/3);
+            },
+            ease: 'power2.inOut',
+          }, 0);
+        }
+      }
+
+      // ============================================
+      // 4. ABOUT SECTION - Image Animation
+      // ============================================
+      const aboutImage = document.querySelector('.about-image');
+
+      if (aboutImage) {
+        // Image fades in and scales up
         gsap.fromTo(
-          statsCards,
+          aboutImage,
           {
-            y: isMobile ? 60 : 80,
+            scale: 0.8,
             opacity: 0,
-            rotateX: isMobile ? 0 : 10, // No 3D rotation on mobile
+            rotateY: -20,
           },
           {
-            y: 0,
+            scale: 1,
             opacity: 1,
-            rotateX: 0,
-            stagger: 0.1,
+            rotateY: 0,
             ease: 'power2.out',
             scrollTrigger: {
               trigger: '#about',
@@ -140,7 +273,7 @@ export default function useScrollAnimations() {
       }
 
       // ============================================
-      // 4. CONTACT SECTION - Entrance Animation
+      // 5. CONTACT SECTION - Entrance Animation
       // ============================================
       const contactSection = document.getElementById('contact');
       

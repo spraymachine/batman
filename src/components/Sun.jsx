@@ -19,13 +19,14 @@ export default function Sun() {
         left: '15%',
         width: '100px',
         height: '100px',
-        zIndex: 100,
+        zIndex: 9999, // Ensure it's on top of all content including images
         pointerEvents: 'none',
       }}
       aria-hidden="true"
     >
       {/* Sun core with glow */}
       <div
+        className="sun-core"
         style={{
           position: 'absolute',
           width: '100%',
@@ -44,6 +45,7 @@ export default function Sun() {
       
       {/* Sun rays */}
       <div
+        className="sun-rays"
         style={{
           position: 'absolute',
           width: '120%',
