@@ -18,7 +18,7 @@ export default function Portfolio() {
         justifyContent: 'flex-start',
         padding: '80px 20px 200px 20px', // Extra bottom padding to push About down
         position: 'relative',
-        zIndex: 10, // Ensure Portfolio stays on top while scrolling
+        zIndex: 1, // Lower z-index so Sun/Moon appear on top
         backgroundColor: 'transparent', // Transparent to show starfield
       }}
     >

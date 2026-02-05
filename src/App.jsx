@@ -58,18 +58,18 @@ function App() {
       {/* Space Background Effects */}
       <Starfield />
       {/* Northern Lights removed for clear night sky */}
-      
-      {/* Global Scroll Elements - Sun and Moon */}
-      <Sun />
-      <Moon />
 
       {/* Main Sections - Scroll is the navigation */}
-      <main style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 10 }}>
+      <main style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
         <Landing />
         <Portfolio />
         <About />
         <Contact />
       </main>
+      
+      {/* Global Scroll Elements - Sun and Moon (rendered AFTER main for proper z-index stacking) */}
+      <Sun />
+      <Moon />
 
       {/* Performance indicator - remove in production */}
       <div

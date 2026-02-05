@@ -71,11 +71,24 @@ p {
   }
 }
 
+/* App container - establish stacking context */
+.app {
+  position: relative;
+  isolation: isolate; /* Creates new stacking context */
+}
+
 /* Section Base Styles */
 .section {
   min-height: 100vh;
   position: relative;
   width: 100%;
+}
+
+/* Sun and Moon - ALWAYS on top */
+#sun,
+#moon {
+  z-index: 99999 !important;
+  isolation: isolate;
 }
 
 /* Ensure sections don't overlap */

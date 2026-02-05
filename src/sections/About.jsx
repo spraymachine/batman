@@ -11,7 +11,7 @@ export default function About() {
         minHeight: '100vh',
         position: 'relative',
         padding: '80px 20px',
-        zIndex: 5,
+        zIndex: 1,
         backgroundColor: 'transparent',
         display: 'flex',
         flexDirection: 'column',
@@ -73,6 +73,7 @@ export default function About() {
           border: '3px solid var(--silver-white)',
           overflow: 'hidden',
           position: 'relative',
+          zIndex: 1, /* Lower z-index so Sun/Moon appear on top */
         }}
       >
         {/* Inner glow effect */}
