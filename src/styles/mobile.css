@@ -36,9 +36,11 @@
     opacity: 0.3 !important;
   }
   
-  /* Reduce starfield density on mobile for performance */
+  /* Keep starfield crisp and visible on mobile */
   .starfield {
-    opacity: 0.6 !important;
+    opacity: 1 !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
   }
 
   /* Simplify stat cards for mobile */
