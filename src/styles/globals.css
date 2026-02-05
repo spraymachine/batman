@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design System Variables - SPACE THEME */
+:root {
+  --space-dark: #000000;
+  --space-deeper: #000000;
+  --aurora-green: #00ff87;
+  --aurora-blue: #00d4ff;
+  --aurora-purple: #b794f6;
+  --silver-white: #e8f4f8;
+  --cosmic-yellow: #ffd700;
+  --sun-orange: #ff6b35;
+  --moon-silver: #c0c0c0;
+  --jupiter-orange: #c88b3a;
+  --jupiter-brown: #8b5a3c;
+  --star-white: #ffffff;
+  --text-light: #e8f4f8;
+}
+
+/* Global Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Override for Lenis */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro', 'Segoe UI', sans-serif;
+  background-color: #000000;
+  color: var(--text-light);
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Performance Optimizations */
+.will-animate {
+  will-change: transform;
+}
+
+.will-fade {
+  will-change: opacity, transform;
+}
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Section Base Styles */
+.section {
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure sections don't overlap */
+main > section {
+  display: block;
+  clear: both;
+}
+
+/* Smooth text rendering */
+body {
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom scrollbar (for desktop) - SPACE THEME */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--aurora-green), var(--aurora-blue));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--aurora-blue), var(--aurora-purple));
+}
+
+/* Starfield Background */
+.starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background: var(--star-white);
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 3D Transform Context */
+.preserve-3d {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+

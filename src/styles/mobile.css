@@ -1,0 +1,213 @@
+/**
+ * Mobile Performance Optimizations
+ * Reduces complexity on small screens for better FPS
+ */
+
+/* Mobile-specific adjustments (max-width: 480px) - SPACE THEME */
+@media (max-width: 480px) {
+  /* Reduce Sun and Moon size on mobile */
+  .sun,
+  .moon {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  
+  .sun > div {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important;
+  }
+  
+  .moon > div {
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.4) !important;
+  }
+
+  /* Simplify cube shadows */
+  .cube-face {
+    box-shadow: none !important;
+  }
+
+  /* Reduce cube size */
+  .cube-container {
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  /* Reduce nebula filter intensity on mobile */
+  #contact svg {
+    opacity: 0.3 !important;
+  }
+  
+  /* Reduce starfield density on mobile for performance */
+  .starfield {
+    opacity: 0.6 !important;
+  }
+
+  /* Simplify stat cards for mobile */
+  .stat-card {
+    box-shadow: 0 2px 15px rgba(0, 255, 135, 0.15) !important;
+    background-color: rgba(0, 0, 0, 0.9) !important;
+  }
+
+  /* Reduce form padding */
+  #contact form > div {
+    margin-bottom: 16px;
+  }
+
+  /* Optimize sticky positioning */
+  .preserve-3d {
+    transform-style: flat;
+  }
+
+  /* FIX: About section mobile adjustments */
+  #about {
+    min-height: 180vh !important; /* More height for proper scroll choreography */
+  }
+
+  /* Portfolio section mobile adjustments */
+  #portfolio {
+    padding: 60px 20px 100px 20px !important; /* Reduced top/side padding, kept bottom padding */
+  }
+
+  /* Adjust about section text */
+  #about .about-text {
+    margin-bottom: 30px !important;
+    padding: 0 20px;
+  }
+
+  #about h2 {
+    font-size: 1.75rem !important;
+    margin-bottom: 12px !important;
+  }
+
+  #about p {
+    font-size: 0.95rem !important;
+  }
+
+  /* Reduce stats container gap */
+  .stats-container {
+    gap: 16px !important;
+    padding: 0 16px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure Sun and Moon stay on top of everything */
+  .sun,
+  .moon {
+    z-index: 150 !important;
+    pointer-events: none !important;
+  }
+
+  /* Make stat cards smaller */
+  .stat-card {
+    padding: 16px !important;
+  }
+
+  .stat-card h3 {
+    font-size: 16px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .stat-card li {
+    font-size: 13px !important;
+  }
+}
+
+/* Tablet adjustments (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Adjust perspective for tablets */
+  .cube-grid {
+    perspective: 800px !important;
+  }
+
+  /* Stack cubes on smaller screens */
+  .cube-container {
+    margin: 15px !important;
+  }
+
+  /* Reduce section padding */
+  .section {
+    padding: 40px 16px !important;
+  }
+
+  /* About section adjustments for tablets */
+  #about .about-text {
+    padding: 0 30px;
+  }
+
+  /* Stack stats in 2 columns on tablet */
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .section {
+    min-height: 100vh;
+  }
+
+  /* Adjust about section height in landscape */
+  #about {
+    min-height: 150vh;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .cube:hover {
+    transform: none !important;
+  }
+
+  /* Increase touch targets */
+  input,
+  textarea,
+  button {
+    min-height: 44px;
+  }
+
+  /* Disable 3D transforms on touch for better performance */
+  .preserve-3d {
+    transform-style: flat;
+  }
+}
+
+/* High-performance mode for low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable 3D transforms */
+  .preserve-3d {
+    transform-style: flat;
+  }
+
+  /* Disable filters */
+  #contact svg {
+    display: none;
+  }
+}
+
+/* Dark mode support (bonus) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cream-base: #1a1a1a;
+    --text-dark: #f6f1eb;
+  }
+
+  body {
+    background-color: #1a1a1a;
+    color: #f6f1eb;
+  }
+
+  .stat-card {
+    background-color: #2a2a2a !important;
+    border-color: rgba(47, 93, 80, 0.3) !important;
+  }
+}
+
