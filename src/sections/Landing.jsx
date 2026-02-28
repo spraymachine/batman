@@ -1,9 +1,14 @@
+import { useRef } from 'react';
+
 /**
  * Landing Section - SPACE THEME
  * Full viewport, minimal headline
  * Sun and Moon start above viewport and fall on scroll
  */
 export default function Landing() {
+  const headingRef = useRef(null);
+  const subheadingRef = useRef(null);
+
   return (
     <section
       id="landing"
@@ -21,9 +26,13 @@ export default function Landing() {
         style={{
           textAlign: 'center',
           maxWidth: '800px',
+          perspective: '1000px', // Enable 3D transforms for sphere animation
+          transformStyle: 'preserve-3d',
         }}
       >
         <h1
+          ref={headingRef}
+          id="landing-heading"
           style={{
             fontSize: 'clamp(2.5rem, 8vw, 5rem)',
             fontWeight: '700',
@@ -33,18 +42,11 @@ export default function Landing() {
             textShadow: '0 0 20px rgba(0, 255, 135, 0.5), 0 0 40px rgba(0, 212, 255, 0.3)',
           }}
         >
-          Creative Frontend
-          <br />
-          <span style={{ 
-            background: 'linear-gradient(135deg, var(--aurora-green), var(--aurora-blue))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}>
-            Engineer
-          </span>
+          Hi, I'm <span id="landing-name">Mani</span>
         </h1>
         <p
+          ref={subheadingRef}
+          id="landing-subheading"
           style={{
             fontSize: 'clamp(1rem, 2vw, 1.25rem)',
             color: 'var(--silver-white)',
@@ -53,7 +55,7 @@ export default function Landing() {
             lineHeight: '1.6',
           }}
         >
-          Building cosmic scroll-driven experiences across the universe
+          coding EXPERIENCES
         </p>
       </div>
 
@@ -95,5 +97,3 @@ export default function Landing() {
     </section>
   );
 }
-
-

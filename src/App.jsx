@@ -4,9 +4,9 @@ import './styles/globals.css';
 import './styles/mobile.css';
 
 // Import components - SPACE THEME
-import Sun from './components/Sun';
-import Moon from './components/Moon';
 import Starfield from './components/Starfield';
+import Scene3D from './components/Scene3D';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import sections
 import Landing from './sections/Landing';
@@ -67,9 +67,10 @@ function App() {
         <Contact />
       </main>
       
-      {/* Global Scroll Elements - Sun and Moon (rendered AFTER main for proper z-index stacking) */}
-      <Sun />
-      <Moon />
+      {/* Global Scroll Elements - 3D Sun and Moon (rendered AFTER main for proper z-index stacking) */}
+      <ErrorBoundary>
+        <Scene3D />
+      </ErrorBoundary>
 
       {/* Performance indicator - remove in production */}
       <div
@@ -87,7 +88,7 @@ function App() {
       >
         Scroll-driven 🌌
       </div>
-    </div>
+      </div>
   );
 }
 

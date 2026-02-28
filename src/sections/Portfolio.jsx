@@ -19,6 +19,7 @@ export default function Portfolio() {
         padding: '80px 20px 200px 20px', // Extra bottom padding to push About down
         position: 'relative',
         zIndex: 1, // Lower z-index so Sun/Moon appear on top
+        overflow: 'hidden', // Prevent orbiting cubes from visually overlapping Landing/About
         backgroundColor: 'transparent', // Transparent to show starfield
       }}
     >
