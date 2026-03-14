@@ -45,11 +45,17 @@ export default function Scene3D() {
         pointerEvents: 'none',
       }}
       camera={{ position: [0, 0, 5], fov: 50 }}
-      gl={{ 
-        antialias: true, 
-        alpha: true, 
+      onCreated={({ gl, scene }) => {
+        gl.setClearColor(0x000000, 0);
+        gl.setClearAlpha(0);
+        scene.background = null;
+      }}
+      gl={{
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: false,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.2
+        toneMappingExposure: 1.2,
       }}
     >
       {/* Simple, clean lighting setup */}

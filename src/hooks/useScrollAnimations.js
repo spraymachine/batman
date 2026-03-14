@@ -252,32 +252,52 @@ export default function useScrollAnimations() {
           // ============================================
           // 1. LANDING SECTION - Sun and Moon Drop Animation
           // ============================================
-          // Initial positions: Sun left (-2, 3), Moon right (2, 3)
-          // Animate them falling down and slightly moving apart
-          
+          // Positions are viewport-responsive: on mobile (narrow aspect) planets stay visible
+          const getPlanetLandingPositions = () => {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const aspect = vw / vh;
+            const CAMERA_Z = 5;
+            const FOV_DEG = 50;
+            const worldHeight = 2 * Math.tan((FOV_DEG * Math.PI) / 360) * CAMERA_Z;
+            const worldWidth = worldHeight * aspect;
+            const maxX = worldWidth / 2 - 0.15; // margin from edge
+            const isMobile = vw <= 768;
+            const sunX = isMobile ? -Math.min(maxX, 1.1) : -2.5;
+            const moonX = isMobile ? Math.min(maxX, 1.1) : 2.5;
+            const sunStartX = isMobile ? -Math.min(maxX * 0.85, 0.95) : -2;
+            const moonStartX = isMobile ? Math.min(maxX * 0.85, 0.95) : 2;
+            return { sunStartX, moonStartX, sunX, moonX };
+          };
+
           const landingTimeline = gsap.timeline({
             scrollTrigger: {
               trigger: '#landing',
               start: 'top top',
               end: 'bottom top',
               scrub: true,
+              invalidateOnRefresh: true,
               markers: false,
             },
           });
-          
-          // Sun falls down and moves slightly left
-          landingTimeline.to(sun3D.position, {
-            x: -2.5, // Move more left
-            y: 0, // Fall to center Y
-            ease: 'linear',
-          }, 0);
-          
-          // Moon falls down and moves slightly right
-          landingTimeline.to(moon3D.position, {
-            x: 2.5, // Move more right
-            y: 0, // Fall to center Y
-            ease: 'linear',
-          }, 0);
+
+          // Set initial positions immediately (avoids off-screen flash on mobile)
+          const initPos = getPlanetLandingPositions();
+          gsap.set(sun3D.position, { x: initPos.sunStartX, y: 3, z: 0 });
+          gsap.set(moon3D.position, { x: initPos.moonStartX, y: 3, z: 0 });
+
+          landingTimeline.fromTo(
+            sun3D.position,
+            { x: () => getPlanetLandingPositions().sunStartX, y: 3, z: 0 },
+            { x: () => getPlanetLandingPositions().sunX, y: 0, z: 0, ease: 'linear' },
+            0
+          );
+          landingTimeline.fromTo(
+            moon3D.position,
+            { x: () => getPlanetLandingPositions().moonStartX, y: 3, z: 0 },
+            { x: () => getPlanetLandingPositions().moonX, y: 0, z: 0, ease: 'linear' },
+            0
+          );
           
           // ============================================
           // 2. CONTINUOUS ROTATION - Tied to entire page scroll
@@ -359,26 +379,35 @@ export default function useScrollAnimations() {
               },
             });
             
-            // Target: either side of the image, along its bottom edge (not below).
-            // We inset from edges so planet centers sit *on* the image, not outside it.
+            // Target: on top of the image near its bottom corners.
             const getAboutTargets = () => {
               const rect = aboutImage.getBoundingClientRect();
+              const vw = window.innerWidth;
+              const vh = window.innerHeight;
+              const aspect = vw / vh;
+              const worldHeight = 2 * Math.tan((CAMERA_FOV_DEG * Math.PI) / 360) * CAMERA_Z;
+              const worldWidth = worldHeight * aspect;
+              const maxWorldX = worldWidth / 2 - 0.2;
 
               // Inset is a fraction of image size so it scales on mobile/desktop.
-              // - X inset keeps planets inside the image width (so they sit on the image)
-              // - Y inset keeps planet centers inside the image height (so they don't dip below)
-              const insetXPx = Math.min(110, rect.width * 0.22); // cap for desktop, scale for mobile
-              const insetYPx = Math.min(110, rect.height * 0.18); // keeps them on the bottom strip of the image
+              const insetXPx = Math.min(90, rect.width * 0.2);
+              const insetFromBottomPx = Math.min(70, rect.height * 0.14);
 
               const leftXPx = rect.left + insetXPx;
               const rightXPx = rect.right - insetXPx;
-              const bottomYPx = rect.bottom - insetYPx;
+              const bottomYPx = rect.bottom - insetFromBottomPx;
 
-              const leftWorld = screenToWorldAtZ0(leftXPx, bottomYPx);
-              const rightWorld = screenToWorldAtZ0(rightXPx, bottomYPx);
+              let leftWorld = screenToWorldAtZ0(leftXPx, bottomYPx);
+              let rightWorld = screenToWorldAtZ0(rightXPx, bottomYPx);
+
+              // Clamp to visible world bounds (prevents planets off-screen on narrow viewports)
+              leftWorld = { ...leftWorld, x: Math.max(-maxWorldX, leftWorld.x) };
+              rightWorld = { ...rightWorld, x: Math.min(maxWorldX, rightWorld.x) };
 
               return { leftWorld, rightWorld };
             };
+
+            const getAboutScale = () => (window.innerWidth <= 768 ? 0.55 : 0.8);
 
             // Sun converges to left bottom area of the image
             aboutTimeline.to(sun3D.position, {
@@ -387,14 +416,14 @@ export default function useScrollAnimations() {
               z: 0,
               ease: 'power1.inOut',
             }, 0);
-            
+
             aboutTimeline.to(sun3D.scale, {
-              x: 0.8, // Smaller size - no expansion
-              y: 0.8,
-              z: 0.8,
+              x: () => getAboutScale(),
+              y: () => getAboutScale(),
+              z: () => getAboutScale(),
               ease: 'power1.inOut',
             }, 0);
-            
+
             // Moon converges to right bottom area of the image
             aboutTimeline.to(moon3D.position, {
               x: () => getAboutTargets().rightWorld.x,
@@ -402,11 +431,11 @@ export default function useScrollAnimations() {
               z: 0,
               ease: 'power1.inOut',
             }, 0);
-            
+
             aboutTimeline.to(moon3D.scale, {
-              x: 0.8, // Smaller size - no expansion
-              y: 0.8,
-              z: 0.8,
+              x: () => getAboutScale(),
+              y: () => getAboutScale(),
+              z: () => getAboutScale(),
               ease: 'power1.inOut',
             }, 0);
           }
@@ -508,50 +537,16 @@ export default function useScrollAnimations() {
             measureCubes();
 
             const isMobile = window.innerWidth <= 768;
-            const orbitTurns = isMobile ? 1.2 : 1.6; // keep mobile crisp
-            const getOrbitR = () => clamp(70, window.innerWidth * 0.18, 140);
 
             const lerp = (a, b, t) => a + (b - a) * t;
 
             /**
              * Untransformed layout center in viewport px.
-             * We correct the measured center by scroll delta so orbits stay centered even while the page scrolls.
+             * We correct the measured center by scroll delta so trajectories stay centered even while the page scrolls.
              */
             const getBaseCenterPx = (info) => {
               const dy = window.scrollY - info.measuredScrollY;
               return { x: info.initialCenter.x, y: info.initialCenter.y - dy };
-            };
-
-            /**
-             * Orbit path: horizontal (major axis on X), slight vertical tilt on Y.
-             * This reads like a gravitational revolution around the planet center.
-             */
-            const getOrbitCenterPx = (info, orbitT, radiusExtra = 0) => {
-              const { sun, moon } = getPlanetsCenterPx();
-              const planet = info.side === 'right' ? sun : moon; // Right cubes → Sun, Left cubes → Moon
-
-              const dir = info.side === 'right' ? 1 : -1;
-              const ringCountSafe = info.ringCount || 1;
-
-              // Evenly spaced in a single ring (6 cubes per side in current grid)
-              const baseAngle = (info.ringIndex / ringCountSafe) * Math.PI * 2 + (info.side === 'right' ? Math.PI / 6 : -Math.PI / 6);
-              const angle = baseAngle + dir * orbitT * orbitTurns * Math.PI * 2;
-
-              const r = getOrbitR() + radiusExtra;
-              // Ellipse: wide on X, shallow on Y (horizontal revolution)
-              const yTilt = isMobile ? 0.18 : 0.22;
-              const rx = r;
-              const ry = r * yTilt;
-
-              // Depth illusion: when sin(angle) is positive, cube is "closer" (front)
-              const depth = (Math.sin(angle) + 1) / 2; // 0..1
-
-              return {
-                x: planet.x + rx * Math.cos(angle),
-                y: planet.y + ry * Math.sin(angle),
-                angle,
-                depth,
-              };
             };
 
             // === Reduced motion fallback ===
@@ -578,9 +573,9 @@ export default function useScrollAnimations() {
                 .to({}, { duration: 0.12 }) // hold
                 .to(cubeContainers, { opacity: 0, ease: 'none', duration: 0.25 }, 0.75);
             } else {
-              // === Full orbit choreography (entry from below → transition → orbit) ===
-              const orbitState = { t: 0 };
-              const driftState = { p: 0 };
+              // === Gravity slingshot choreography (entry from below → transition → flyby → fade) ===
+              const slingshotState = { t: 0 };
+              const transitionState = { blend: 0 };
 
               const orbitTl = gsap.timeline({
                 scrollTrigger: {
@@ -647,129 +642,153 @@ export default function useScrollAnimations() {
               // PHASE B: SETTLE & HOLD
               // ============================================
               // Brief pause to let the entry read clearly before transition
-              orbitTl.to({}, { duration: 0.14 }, entryPhaseEnd);
+              orbitTl.to({}, { duration: 0.1 }, entryPhaseEnd);
 
               // ============================================
-              // PHASE C: SMOOTH TRANSITION TO ORBIT
+              // PHASE C: SMOOTH TRANSITION TO SLINGSHOT START
               // ============================================
-              const transitionStart = entryPhaseEnd + 0.14;
-              const transitionDuration = 0.46; // a touch longer to feel seamless
-              const transitionStagger = 0.02; // stagger the "fly-to-orbit" so it reads clearly
+              const transitionStart = entryPhaseEnd + 0.1;
+              const transitionDuration = 0.52;
 
-              const getPlanetPx = (info) => {
-                const { sun, moon } = getPlanetsCenterPx();
-                return info.side === 'right' ? sun : moon;
+              // === Slingshot helpers (2D screen-space) ===
+              // Cubic Bézier utilities (no extra deps) for a gravity-bend flyby.
+              const bezier = (t, p0, p1, p2, p3) => {
+                const u = 1 - t;
+                const u2 = u * u;
+                const u3 = u2 * u;
+                const t2 = t * t;
+                const t3 = t2 * t;
+                return u3 * p0 + 3 * u2 * t * p1 + 3 * u * t2 * p2 + t3 * p3;
               };
 
-              orderedInfos.forEach((info, idx) => {
-                const t0 = transitionStart + idx * transitionStagger;
+              const bezierTangent = (t, p0, p1, p2, p3) => {
+                const u = 1 - t;
+                // Derivative of cubic Bézier
+                return (
+                  3 * u * u * (p1 - p0) +
+                  6 * u * t * (p2 - p1) +
+                  3 * t * t * (p3 - p2)
+                );
+              };
 
-                // Create a smooth curved path: two-phase transition
-                // Phase C1: Pull toward planet (curved arc upward) - more dramatic curve
-                orbitTl.to(
-                  info.el,
-                  {
-                    x: () => {
-                      const base = getBaseCenterPx(info);
-                      const planet = getPlanetPx(info);
-                      const midX = base.x + (planet.x - base.x) * 0.55;
-                      return midX - base.x;
-                    },
-                    y: () => {
-                      const base = getBaseCenterPx(info);
-                      const planet = getPlanetPx(info);
-                      const midY = base.y + (planet.y - base.y) * 0.55 - window.innerHeight * 0.12;
-                      return midY - base.y;
-                    },
-                    rotationY: info.side === 'right' ? 75 : -75,
-                    scale: 0.92,
-                    ease: 'power2.inOut',
-                    duration: transitionDuration * 0.55,
-                  },
-                  t0
+              const getFlybyR = () => {
+                // Mobile: smaller, tighter flyby so it fits narrow viewports.
+                // Desktop: slightly wider for drama.
+                return isMobile
+                  ? clamp(52, window.innerWidth * 0.16, 108)
+                  : clamp(74, window.innerWidth * 0.18, 150);
+              };
+
+              const getSlingshotPosition = (info, localT, radiusExtra = 0) => {
+                const { sun, moon } = getPlanetsCenterPx();
+                const planet = info.side === 'right' ? moon : sun; // Right cubes → Moon, Left cubes → Sun
+
+                const ringCountSafe = info.ringCount || 1;
+                const lane =
+                  (info.ringIndex - (ringCountSafe - 1) / 2) / ringCountSafe; // roughly [-0.5..0.5]
+
+                const r = getFlybyR() + radiusExtra;
+                // Mirror horizontally for the Moon side (approach from top-right → exit bottom-left).
+                const xMul = info.side === 'right' ? -1 : 1;
+
+                // Control points (clockwise-ish bend around planet)
+                const p0 = { x: planet.x + xMul * (-r * 1.2), y: planet.y + (-r * 0.9) + lane * (r * 0.18) };
+                const p1 = { x: planet.x + xMul * (-r * 0.35), y: planet.y + (r * 0.25) + lane * (r * 0.22) };
+                const p2 = { x: planet.x + xMul * (r * 0.35), y: planet.y + (r * 0.6) + lane * (r * 0.16) };
+                const p3 = { x: planet.x + xMul * (r * 1.25), y: planet.y + (r * 0.92) + lane * (r * 0.14) };
+
+                const x = bezier(localT, p0.x, p1.x, p2.x, p3.x);
+                const y = bezier(localT, p0.y, p1.y, p2.y, p3.y);
+
+                const tx = bezierTangent(localT, p0.x, p1.x, p2.x, p3.x);
+                const ty = bezierTangent(localT, p0.y, p1.y, p2.y, p3.y);
+                const speed = Math.sqrt(tx * tx + ty * ty);
+
+                const distToPlanet = Math.sqrt(
+                  Math.pow(x - planet.x, 2) + Math.pow(y - planet.y, 2)
                 );
 
-                // Phase C2: Settle into orbit position (smooth landing with slight overshoot correction)
-                orbitTl.to(
-                  info.el,
-                  {
-                    x: () => {
-                      const base = getBaseCenterPx(info);
-                      const orbitStartPx = getOrbitCenterPx(info, 0);
-                      return orbitStartPx.x - base.x;
-                    },
-                    y: () => {
-                      const base = getBaseCenterPx(info);
-                      const orbitStartPx = getOrbitCenterPx(info, 0);
-                      return orbitStartPx.y - base.y;
-                    },
-                    rotationY: info.side === 'right' ? 180 : -180,
-                    scale: 1,
-                    ease: 'power2.inOut',
-                    duration: transitionDuration * 0.45,
-                  },
-                  t0 + transitionDuration * 0.55
-                );
-              });
+                return { x, y, tx, ty, speed, distToPlanet, r };
+              };
 
-              // ============================================
-              // PHASE D: ORBIT ANIMATION
-              // ============================================
-              const transitionEnd =
-                transitionStart + transitionDuration + transitionStagger * Math.max(0, orderedInfos.length - 1);
-              const orbitStart = transitionEnd;
-              const orbitDuration = 0.4; // Longer orbit for more visible revolution
+              // Assign a consistent sequence index so left/right cubes stream in a single readable order.
+              const sequenceIndexByEl = new Map();
+              orderedInfos.forEach((info, idx) => sequenceIndexByEl.set(info.el, idx));
 
+              // Blend the line formation into the slingshot start position.
+              orbitTl.set(transitionState, { blend: 0 }, transitionStart);
               orbitTl.to(
-                orbitState,
+                transitionState,
                 {
-                  t: 1,
-                  ease: 'none',
-                  duration: orbitDuration,
+                  blend: 1,
+                  ease: 'power2.inOut',
+                  duration: transitionDuration,
                   onUpdate: () => {
                     cubeInfo.forEach((info) => {
-                      const center = getOrbitCenterPx(info, orbitState.t);
                       const base = getBaseCenterPx(info);
-                      info.setX(center.x - base.x);
-                      info.setY(center.y - base.y);
-                      // Self-rotation + depth-based scale/opacity to simulate front/back revolution
-                      info.setRY((info.side === 'right' ? 1 : -1) * orbitState.t * 360);
-                      info.setScale(lerp(0.88, 1.08, center.depth));
-                      info.setOpacity(lerp(0.65, 1, center.depth));
+                      const p = getSlingshotPosition(info, 0);
+                      const targetX = p.x - base.x;
+                      const targetY = p.y - base.y;
+
+                      info.setX(targetX * transitionState.blend);
+                      info.setY(targetY * transitionState.blend);
+                      info.setRY(0);
+                      info.setScale(lerp(1, 0.98, transitionState.blend));
+                      info.setOpacity(lerp(1, 1, transitionState.blend));
                     });
                   },
                 },
-                orbitStart
+                transitionStart
               );
 
               // ============================================
-              // PHASE E: DRIFT OUTWARD + FADE OUT
+              // PHASE D: SLINGSHOT FLYBY (scroll-linked)
               // ============================================
-              const fadeStart = orbitStart + orbitDuration;
-              const fadeDuration = 0.2;
+              const transitionEnd = transitionStart + transitionDuration;
+              const slingshotStart = transitionEnd;
+              const STAGGER = 0.07; // stream spacing between cubes
+              const slingshotEndT = 1 + STAGGER * Math.max(0, orderedInfos.length - 1);
+              const slingshotDuration = 0.62; // scroll-linked duration budget for the whole stream
 
+              orbitTl.set(slingshotState, { t: 0 }, slingshotStart);
               orbitTl.to(
-                driftState,
+                slingshotState,
                 {
-                  p: 1,
-                  ease: 'power1.out',
-                  duration: fadeDuration,
+                  t: slingshotEndT,
+                  ease: 'none',
+                  duration: slingshotDuration,
                   onUpdate: () => {
-                    const drift = driftState.p;
-                    const driftR = drift * 100; // Slightly larger drift radius
-
                     cubeInfo.forEach((info) => {
-                      const center = getOrbitCenterPx(info, 1, driftR);
                       const base = getBaseCenterPx(info);
-                      info.setX(center.x - base.x);
-                      info.setY(center.y - base.y);
-                      info.setRY((info.side === 'right' ? 1 : -1) * (orbitTurns * 360 + drift * 150));
-                      info.setScale(lerp(0.88, 1.08, center.depth) * (1 - drift * 0.12));
-                      info.setOpacity(lerp(0.65, 1, center.depth) * (1 - drift));
+                      const seqIdx = sequenceIndexByEl.get(info.el) ?? 0;
+                      const localT = slingshotState.t - seqIdx * STAGGER;
+
+                      // Clamp to path range for stable math, but manage opacity around edges.
+                      const tClamped = clamp(0, localT, 1);
+                      const p = getSlingshotPosition(info, tClamped);
+
+                      info.setX(p.x - base.x);
+                      info.setY(p.y - base.y);
+
+                      // Subtle self spin for energy (kept small so it reads on mobile)
+                      const spinDir = info.side === 'right' ? 1 : -1;
+                      info.setRY(spinDir * (tClamped * 220 + info.ringIndex * 10));
+
+                      // Pop near the planet: closer distance → slightly larger/brighter
+                      const closeT = 1 - clamp(0, p.distToPlanet / (p.r * 0.95), 1);
+                      const scale = lerp(0.92, 1.12, closeT);
+
+                      // Fade in/out based on streaming window around [0..1]
+                      const fadeIn = clamp(0, localT / 0.12, 1);
+                      const fadeOut = 1 - clamp(0, (localT - 1) / 0.22, 1);
+                      const alpha = fadeIn * fadeOut;
+
+                      info.setScale(scale);
+                      info.setOpacity(lerp(0.55, 1, closeT) * alpha);
                     });
                   },
                 },
-                fadeStart
+                slingshotStart
               );
             }
           }

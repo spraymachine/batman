@@ -23,6 +23,8 @@ export default function Contact() {
         backgroundColor: 'transparent',
       }}
     >
+
+
       {/* Cosmic Nebula SVG Filter Background */}
       <svg
         style={{
@@ -31,7 +33,7 @@ export default function Contact() {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 0,
+          zIndex: 1,
           opacity: 0.6,
         }}
       >
@@ -96,7 +98,7 @@ export default function Contact() {
       <div
         style={{
           position: 'relative',
-          zIndex: 1,
+          zIndex: 2,
           width: '100%',
           maxWidth: '500px',
           backgroundColor: 'rgba(0, 0, 0, 0.9)',

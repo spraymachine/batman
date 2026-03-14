@@ -126,6 +126,12 @@
 
 /* Tablet adjustments (max-width: 768px) */
 @media (max-width: 768px) {
+  /* Main content above planets so orbiting cubes appear in front (axis around planets) */
+  main {
+    position: relative;
+    z-index: 100000 !important;
+  }
+
   /* Adjust perspective for tablets */
   .cube-grid {
     perspective: 800px !important;

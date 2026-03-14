@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { LaserFlow } from '../components/LaserFlow';
 
 /**
  * Landing Section - SPACE THEME
@@ -20,14 +21,70 @@ export default function Landing() {
         minHeight: '100vh',
         padding: '20px',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      {/* LaserFlow - Bottom corners */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 'min(1080px, 65vh)',
+          zIndex: 2,
+          pointerEvents: 'none',
+          overflow: 'visible',
+        }}
+      >
+        {/* Left - bottom left corner */}
+        <div style={{ width: '1080px', height: '1080px', position: 'absolute', left: 0, bottom: 0 }}>
+          <LaserFlow
+            color="#ffffff"
+            wispDensity={1.6}
+            flowSpeed={0.7}
+            verticalSizing={3.6}
+            horizontalSizing={1.8}
+            fogIntensity={0.45}
+            fogScale={0.3}
+            wispSpeed={15}
+            wispIntensity={5}
+            flowStrength={0.25}
+            decay={1.1}
+            horizontalBeamOffset={-0.5}
+            verticalBeamOffset={-0.5}
+          />
+        </div>
+
+        {/* Right - bottom right corner */}
+        <div style={{ width: '1080px', height: '1080px', position: 'absolute', right: 0, bottom: 0 }}>
+          <LaserFlow
+            color="#ffffff"
+            wispDensity={1.6}
+            flowSpeed={0.7}
+            verticalSizing={3.6}
+            horizontalSizing={1.8}
+            fogIntensity={0.45}
+            fogScale={0.3}
+            wispSpeed={15}
+            wispIntensity={5}
+            flowStrength={0.25}
+            decay={1.1}
+            horizontalBeamOffset={0.5}
+            verticalBeamOffset={-0.5}
+          />
+        </div>
+      </div>
+
       <div
         style={{
           textAlign: 'center',
           maxWidth: '800px',
-          perspective: '1000px', // Enable 3D transforms for sphere animation
+          perspective: '1000px',
           transformStyle: 'preserve-3d',
+          position: 'relative',
+          zIndex: 4,
         }}
       >
         <h1
@@ -71,6 +128,7 @@ export default function Landing() {
           alignItems: 'center',
           gap: '8px',
           opacity: 0.6,
+          zIndex: 4,
         }}
       >
         <span
