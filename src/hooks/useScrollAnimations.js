@@ -18,6 +18,7 @@ export default function useScrollAnimations() {
     let animationContext = null;
     let checkInterval = null;
     let isInitialized = false;
+    let scrollListenerCleanup = null;
     
     // Wait for 3D refs to be available (they're set in useEffect in components)
     const initAnimations = () => {
@@ -118,19 +119,52 @@ export default function useScrollAnimations() {
             const headingCharsInDOM = Array.from(headingEl.childNodes).filter(
               (node) => node.nodeType === Node.ELEMENT_NODE && node.id !== 'landing-name'
             );
-            
-            // Collect ALL characters for semi-circle sphere animation
-            const allCharsForSphere = [
-              ...headingCharsInDOM, // "Hi, I'm "
-              ...nameChars, // "Mani"
-              ...subheadingChars, // "coding EXPERIENCES"
-            ];
-            
-            // Semi-circle sphere animation - characters move around X-axis like orbiting a sphere horizontally
-            const sphereRadius = 600; // Radius of the semi-circle in pixels
-            const totalChars = allCharsForSphere.length;
-            
-            allCharsForSphere.forEach((char, index) => {
+
+            // ============================================
+            // 0a. ASSEMBLE-ON-ARRIVAL: "Hi, I'm" and "coding EXPERIENCES"
+            // ============================================
+            // Characters start scattered (opacity 0), assemble into center on mount.
+            // No scroll trigger — runs once when animations initialize.
+            const prefersReducedMotionLanding = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+            const scatterChars = [...headingCharsInDOM, ...subheadingChars];
+
+            scatterChars.forEach((char, index) => {
+              const direction = index % 2 === 0 ? -1 : 1;
+              const scatterAmount = (Math.random() * 300 + 200) * direction;
+
+              if (prefersReducedMotionLanding) {
+                gsap.set(char, { x: 0, rotation: 0, opacity: 1 });
+              } else {
+                gsap.set(char, {
+                  x: scatterAmount,
+                  rotation: direction * 45,
+                  opacity: 0,
+                });
+              }
+            });
+
+            if (!prefersReducedMotionLanding) {
+              gsap.to(scatterChars, {
+                x: 0,
+                rotation: 0,
+                opacity: 1,
+                duration: 0.8,
+                stagger: 0.04,
+                ease: 'power2.out',
+              });
+            }
+
+            // Show landing content now that initial states are set (prevents flash of unstyled text)
+            const landingContent = document.getElementById('landing-content');
+            if (landingContent) gsap.set(landingContent, { opacity: 1 });
+
+            // ============================================
+            // 0b. SPHERE ANIMATION: "Mani" only (scroll-triggered)
+            // ============================================
+            const sphereRadius = 600;
+            const totalChars = nameChars.length;
+
+            nameChars.forEach((char, index) => {
               // Calculate angle along semi-circle (0 to 180 degrees, or 0 to π radians)
               // Distribute characters evenly along the semi-circle
               const angle = (index / (totalChars - 1 || 1)) * Math.PI; // 0 to π (semi-circle)
@@ -197,56 +231,6 @@ export default function useScrollAnimations() {
               1.2 // After sphere animation completes
             );
             
-            // ============================================
-            // 0.5. LANDING SECTION - Scroll-linked Character Scatter Animation
-            // ============================================
-            // Scatter characters horizontally (left/right) as user scrolls down
-            // Only "Hi, I'm" and "coding EXPERIENCES" scatter - "Mani" stays put
-            // Re-query headingChars from DOM to ensure we have valid references
-            const headingCharsForScatter = Array.from(headingEl.childNodes).filter(
-              (node) => node.nodeType === Node.ELEMENT_NODE && node.id !== 'landing-name'
-            );
-            
-            const scatterChars = [
-              ...headingCharsForScatter, // "Hi, I'm " (from DOM)
-              ...subheadingChars, // "coding EXPERIENCES"
-              // nameChars excluded - "Mani" stays fixed
-            ];
-            
-            // Assign random horizontal scatter direction to each character
-            scatterChars.forEach((char, index) => {
-              // Alternate or randomize left/right direction
-              const direction = index % 2 === 0 ? -1 : 1; // Alternate left/right
-              const scatterAmount = (Math.random() * 300 + 200) * direction; // Random distance 200-500px
-              
-              // Set initial position (characters start at their normal position)
-              gsap.set(char, {
-                x: 0,
-                rotation: 0,
-              });
-              
-              // Animate character scatter on scroll (reversible - scroll up returns to original)
-              gsap.to(char, {
-                x: scatterAmount,
-                rotation: direction * 45, // Rotate in scatter direction
-                ease: 'power1.out', // Smooth easing
-                scrollTrigger: {
-                  trigger: '#landing',
-                  start: 'top top', // Start scattering when landing reaches top
-                  end: 'bottom top', // Fully scattered when landing bottom reaches top
-                  scrub: true, // Scroll-linked (tied to scroll position) - reversible
-                  markers: false,
-                },
-              });
-            });
-            
-            // Ensure "Mani" stays fixed - no scatter animation
-            nameChars.forEach((char) => {
-              gsap.set(char, {
-                x: 0,
-                rotation: 0,
-              });
-            });
           }
           
           // ============================================
@@ -265,12 +249,22 @@ export default function useScrollAnimations() {
             const isMobile = vw <= 768;
             const sunX = isMobile ? -Math.min(maxX, 1.1) : -2.5;
             const moonX = isMobile ? Math.min(maxX, 1.1) : 2.5;
-            const sunStartX = isMobile ? -Math.min(maxX * 0.85, 0.95) : -2;
-            const moonStartX = isMobile ? Math.min(maxX * 0.85, 0.95) : 2;
+            const sunStartX = isMobile ? -1.1 : -2;
+            const moonStartX = isMobile ? 1.1 : 2;
             return { sunStartX, moonStartX, sunX, moonX };
           };
 
+          const prefersReducedMotionPlanets = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+
+          // Set initial positions: beside landing text (y=0), no off-screen start
+          const initPos = getPlanetLandingPositions();
+          gsap.set(sun3D.position, { x: initPos.sunStartX, y: 0, z: 0 });
+          gsap.set(moon3D.position, { x: initPos.moonStartX, y: 0, z: 0 });
+
+          // Main scroll-driven position timeline: horizontal drift from beside text to final positions
+          // Created paused; plays after spin completes (or immediately if reduced-motion)
           const landingTimeline = gsap.timeline({
+            paused: true,
             scrollTrigger: {
               trigger: '#landing',
               start: 'top top',
@@ -281,50 +275,97 @@ export default function useScrollAnimations() {
             },
           });
 
-          // Set initial positions immediately (avoids off-screen flash on mobile)
-          const initPos = getPlanetLandingPositions();
-          gsap.set(sun3D.position, { x: initPos.sunStartX, y: 3, z: 0 });
-          gsap.set(moon3D.position, { x: initPos.moonStartX, y: 3, z: 0 });
-
           landingTimeline.fromTo(
             sun3D.position,
-            { x: () => getPlanetLandingPositions().sunStartX, y: 3, z: 0 },
+            { x: () => getPlanetLandingPositions().sunStartX, y: 0, z: 0 },
             { x: () => getPlanetLandingPositions().sunX, y: 0, z: 0, ease: 'linear' },
             0
           );
           landingTimeline.fromTo(
             moon3D.position,
-            { x: () => getPlanetLandingPositions().moonStartX, y: 3, z: 0 },
+            { x: () => getPlanetLandingPositions().moonStartX, y: 0, z: 0 },
             { x: () => getPlanetLandingPositions().moonX, y: 0, z: 0, ease: 'linear' },
             0
           );
+
+          // Spin-on-first-scroll: 2 full rotations in place, then enable position timeline + continuous rotation
+          const startPositionTimeline = () => {
+            landingTimeline.play();
+            // Continue from current rotation (where spin left us) to avoid jittery handoff
+            const sunStartY = sun3D.rotation.y;
+            const moonStartY = moon3D.rotation.y;
+            gsap.fromTo(
+              sun3D.rotation,
+              { y: sunStartY },
+              {
+                y: sunStartY + Math.PI * 6,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: 'body',
+                  start: 'top top',
+                  end: 'bottom bottom',
+                  scrub: 0.5,
+                  markers: false,
+                },
+              }
+            );
+            gsap.fromTo(
+              moon3D.rotation,
+              { y: moonStartY },
+              {
+                y: moonStartY - Math.PI * 6,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: 'body',
+                  start: 'top top',
+                  end: 'bottom bottom',
+                  scrub: 0.5,
+                  markers: false,
+                },
+              }
+            );
+          };
+
+          if (prefersReducedMotionPlanets) {
+            startPositionTimeline();
+          } else {
+            let spinTriggered = false;
+            const SPIN_DURATION = 1.6;
+            const TWO_ROTATIONS = Math.PI * 4;
+
+            const onFirstScroll = () => {
+              if (spinTriggered) return;
+              if (window.scrollY > 5) {
+                spinTriggered = true;
+                if (scrollListenerCleanup) {
+                  scrollListenerCleanup();
+                  scrollListenerCleanup = null;
+                }
+
+                gsap.to(sun3D.rotation, {
+                  y: `+=${TWO_ROTATIONS}`,
+                  duration: SPIN_DURATION,
+                  ease: 'power2.inOut',
+                  overwrite: 'auto',
+                });
+                gsap.to(moon3D.rotation, {
+                  y: `+=${-TWO_ROTATIONS}`,
+                  duration: SPIN_DURATION,
+                  ease: 'power2.inOut',
+                  overwrite: 'auto',
+                });
+
+                gsap.delayedCall(SPIN_DURATION, startPositionTimeline);
+              }
+            };
+            scrollListenerCleanup = () => window.removeEventListener('scroll', onFirstScroll);
+            window.addEventListener('scroll', onFirstScroll, { passive: true });
+          }
           
           // ============================================
           // 2. CONTINUOUS ROTATION - Tied to entire page scroll
+          // Created inside startPositionTimeline (after spin) so it doesn't overwrite the spin
           // ============================================
-          gsap.to(sun3D.rotation, {
-            y: Math.PI * 6, // 3 full rotations (2π * 3)
-            ease: 'none',
-            scrollTrigger: {
-              trigger: 'body',
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 0.5,
-              markers: false,
-            },
-          });
-          
-          gsap.to(moon3D.rotation, {
-            y: -Math.PI * 6, // 3 full rotations opposite direction
-            ease: 'none',
-            scrollTrigger: {
-              trigger: 'body',
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 0.5,
-              markers: false,
-            },
-          });
           
           // ============================================
           // 3. PORTFOLIO SECTION - Keep Sun/Moon in position
@@ -379,26 +420,32 @@ export default function useScrollAnimations() {
               },
             });
             
-            // Target: on top of the image near its bottom corners.
+            // Target: over the image with each planet's bottom edge aligned to the lower border.
             const getAboutTargets = () => {
               const rect = aboutImage.getBoundingClientRect();
               const vw = window.innerWidth;
-              const vh = window.innerHeight;
-              const aspect = vw / vh;
+              const aspect = vw / window.innerHeight;
               const worldHeight = 2 * Math.tan((CAMERA_FOV_DEG * Math.PI) / 360) * CAMERA_Z;
               const worldWidth = worldHeight * aspect;
               const maxWorldX = worldWidth / 2 - 0.2;
+              const scale = getAboutScale();
+              const sunHalfHeightWorld = (window.sun3DHalfHeight ?? 0.5) * scale;
+              const moonHalfHeightWorld = (window.moon3DHalfHeight ?? 0.5) * scale;
 
-              // Inset is a fraction of image size so it scales on mobile/desktop.
-              const insetXPx = Math.min(90, rect.width * 0.2);
-              const insetFromBottomPx = Math.min(70, rect.height * 0.14);
-
+              // Slightly tighter on phones so the planets sit on the picture without spilling off the card.
+              const isPhone = window.innerWidth <= 480;
+              const insetXPx = isPhone
+                ? Math.min(68, rect.width * 0.18)
+                : Math.min(90, rect.width * 0.2);
               const leftXPx = rect.left + insetXPx;
               const rightXPx = rect.right - insetXPx;
-              const bottomYPx = rect.bottom - insetFromBottomPx;
+              const targetYPx = rect.top + rect.height / 2; // halfway of the pic
 
-              let leftWorld = screenToWorldAtZ0(leftXPx, bottomYPx);
-              let rightWorld = screenToWorldAtZ0(rightXPx, bottomYPx);
+              let leftWorld = screenToWorldAtZ0(leftXPx, targetYPx);
+              let rightWorld = screenToWorldAtZ0(rightXPx, targetYPx);
+
+              leftWorld = { ...leftWorld, y: leftWorld.y + sunHalfHeightWorld };
+              rightWorld = { ...rightWorld, y: rightWorld.y + moonHalfHeightWorld };
 
               // Clamp to visible world bounds (prevents planets off-screen on narrow viewports)
               leftWorld = { ...leftWorld, x: Math.max(-maxWorldX, leftWorld.x) };
@@ -407,36 +454,47 @@ export default function useScrollAnimations() {
               return { leftWorld, rightWorld };
             };
 
-            const getAboutScale = () => (window.innerWidth <= 768 ? 0.55 : 0.8);
+            const getAboutScale = () => {
+              if (window.innerWidth <= 480) return 0.48;
+              if (window.innerWidth <= 768) return 0.55;
+              return 0.8;
+            };
 
-            // Sun converges to left bottom area of the image
-            aboutTimeline.to(sun3D.position, {
-              x: () => getAboutTargets().leftWorld.x,
-              y: () => getAboutTargets().leftWorld.y,
-              z: 0,
-              ease: 'power1.inOut',
-            }, 0);
+            const aboutState = { progress: 0 };
 
-            aboutTimeline.to(sun3D.scale, {
-              x: () => getAboutScale(),
-              y: () => getAboutScale(),
-              z: () => getAboutScale(),
-              ease: 'power1.inOut',
-            }, 0);
+            aboutTimeline.to(aboutState, {
+              progress: 1,
+              ease: 'none',
+              onUpdate: () => {
+                const { leftWorld, rightWorld } = getAboutTargets();
+                const scale = getAboutScale();
+                const landingPositions = getPlanetLandingPositions();
+                const currentScale = gsap.utils.interpolate(1, scale, aboutState.progress);
 
-            // Moon converges to right bottom area of the image
-            aboutTimeline.to(moon3D.position, {
-              x: () => getAboutTargets().rightWorld.x,
-              y: () => getAboutTargets().rightWorld.y,
-              z: 0,
-              ease: 'power1.inOut',
-            }, 0);
+                gsap.set(sun3D.position, {
+                  x: gsap.utils.interpolate(landingPositions.sunX, leftWorld.x, aboutState.progress),
+                  y: gsap.utils.interpolate(0, leftWorld.y, aboutState.progress),
+                  z: 0,
+                });
 
-            aboutTimeline.to(moon3D.scale, {
-              x: () => getAboutScale(),
-              y: () => getAboutScale(),
-              z: () => getAboutScale(),
-              ease: 'power1.inOut',
+                gsap.set(moon3D.position, {
+                  x: gsap.utils.interpolate(landingPositions.moonX, rightWorld.x, aboutState.progress),
+                  y: gsap.utils.interpolate(0, rightWorld.y, aboutState.progress),
+                  z: 0,
+                });
+
+                gsap.set(sun3D.scale, {
+                  x: currentScale,
+                  y: currentScale,
+                  z: currentScale,
+                });
+
+                gsap.set(moon3D.scale, {
+                  x: currentScale,
+                  y: currentScale,
+                  z: currentScale,
+                });
+              },
             }, 0);
           }
           
@@ -868,6 +926,9 @@ export default function useScrollAnimations() {
     return () => {
       if (checkInterval) {
         clearInterval(checkInterval);
+      }
+      if (scrollListenerCleanup) {
+        scrollListenerCleanup();
       }
       if (animationContext) {
         animationContext.revert();

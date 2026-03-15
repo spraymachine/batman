@@ -20,15 +20,10 @@
     box-shadow: 0 0 15px rgba(192, 192, 192, 0.4) !important;
   }
 
-  /* Simplify cube shadows */
-  .cube-face {
-    box-shadow: none !important;
-  }
-
-  /* Reduce cube size */
+  /* Cube size overridden in cubes.css (130px mobile) */
   .cube-container {
-    width: 120px !important;
-    height: 120px !important;
+    width: 130px !important;
+    height: 130px !important;
   }
 
   /* Reduce nebula filter intensity on mobile */
@@ -59,11 +54,6 @@
     transform-style: flat;
   }
 
-  /* FIX: About section mobile adjustments */
-  #about {
-    min-height: 180vh !important; /* More height for proper scroll choreography */
-  }
-
   /* Portfolio section mobile adjustments */
   #portfolio {
     padding: 60px 20px 100px 20px !important; /* Reduced top/side padding, kept bottom padding */
@@ -84,15 +74,10 @@
     font-size: 0.95rem !important;
   }
 
-  /* Resize placeholder image for mobile */
+  /* Resize about image for mobile */
   .about-image {
     width: 280px !important;
     height: 280px !important;
-    border-radius: 15px !important;
-  }
-
-  .about-image span {
-    font-size: 1.5rem !important;
   }
 
   /* Reduce stats container gap */
@@ -126,10 +111,10 @@
 
 /* Tablet adjustments (max-width: 768px) */
 @media (max-width: 768px) {
-  /* Main content above planets so orbiting cubes appear in front (axis around planets) */
+  /* Match desktop stacking so the 3D planets stay above section artwork on mobile too */
   main {
     position: relative;
-    z-index: 100000 !important;
+    z-index: 1 !important;
   }
 
   /* Adjust perspective for tablets */
@@ -152,7 +137,7 @@
     padding: 0 30px;
   }
 
-  /* Resize placeholder image for tablets */
+  /* Resize about image for tablets */
   .about-image {
     width: 400px !important;
     height: 400px !important;
@@ -170,10 +155,6 @@
     min-height: 100vh;
   }
 
-  /* Adjust about section height in landscape */
-  #about {
-    min-height: 150vh;
-  }
 }
 
 /* Touch device optimizations */
@@ -235,4 +216,3 @@
     border-color: rgba(47, 93, 80, 0.3) !important;
   }
 }
-

@@ -78,6 +78,7 @@ export default function Landing() {
       </div>
 
       <div
+        id="landing-content"
         style={{
           textAlign: 'center',
           maxWidth: '800px',
@@ -85,6 +86,7 @@ export default function Landing() {
           transformStyle: 'preserve-3d',
           position: 'relative',
           zIndex: 4,
+          opacity: 0,
         }}
       >
         <h1

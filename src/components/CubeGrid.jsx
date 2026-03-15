@@ -2,27 +2,40 @@ import Cube from './Cube';
 
 /**
  * CubeGrid Component
- * Manages the layout of portfolio cubes
+ * Manages the layout of portfolio cubes - cosmic crystal shards
  * 6 from left, 6 from right = 12 total projects
  */
+const ACCENT_PALETTE = [
+  '0, 255, 135',    // aurora green
+  '0, 212, 255',    // aurora blue
+  '183, 148, 246',  // aurora purple
+  '255, 179, 71',   // warm amber
+  '255, 107, 107',  // coral red
+  '100, 220, 255',  // ice blue
+  '255, 200, 87',   // golden
+  '147, 255, 159',  // mint green
+  '220, 130, 255',  // violet
+  '255, 140, 60',   // solar orange
+  '130, 200, 255',  // sky blue
+  '255, 100, 180',  // nebula pink
+];
+
 export default function CubeGrid() {
-  // Portfolio projects data - SPACE THEME
   const projects = [
-    { name: 'E-Commerce Platform', color1: '#00ff87', color2: '#00d4ff' },
-    { name: 'AI Dashboard', color1: '#b794f6', color2: '#00ff87' },
-    { name: 'Mobile Banking App', color1: '#ffd700', color2: '#ff6b35' },
-    { name: 'SaaS Analytics', color1: '#00d4ff', color2: '#b794f6' },
-    { name: 'Social Platform', color1: '#00ff87', color2: '#ffd700' },
-    { name: 'Health Tracker', color1: '#ff6b35', color2: '#00d4ff' },
-    { name: 'Crypto Wallet', color1: '#b794f6', color2: '#ffd700' },
-    { name: 'CMS Builder', color1: '#00ff87', color2: '#ff6b35' },
-    { name: 'Video Streaming', color1: '#00d4ff', color2: '#ffd700' },
-    { name: 'Travel Booking', color1: '#ffd700', color2: '#00ff87' },
-    { name: 'EdTech Platform', color1: '#ff6b35', color2: '#b794f6' },
-    { name: 'IoT Dashboard', color1: '#00ff87', color2: '#00d4ff' },
+    { name: 'E-Commerce Platform' },
+    { name: 'AI Dashboard' },
+    { name: 'Mobile Banking App' },
+    { name: 'SaaS Analytics' },
+    { name: 'Social Platform' },
+    { name: 'Health Tracker' },
+    { name: 'Crypto Wallet' },
+    { name: 'CMS Builder' },
+    { name: 'Video Streaming' },
+    { name: 'Travel Booking' },
+    { name: 'EdTech Platform' },
+    { name: 'IoT Dashboard' },
   ];
 
-  // Split projects: 6 from left, 6 from right
   const leftProjects = projects.slice(0, 6);
   const rightProjects = projects.slice(6, 12);
 
@@ -34,19 +47,30 @@ export default function CubeGrid() {
         perspectiveOrigin: 'center center',
         display: 'flex',
         flexDirection: 'column',
-        gap: '60px', // Increased from 40px
+        gap: '60px',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '40px 20px 120px 20px', // Extra bottom padding
-        minHeight: '100vh', // Ensure minimum height
+        padding: '40px 20px 120px 20px',
+        minHeight: '100vh',
       }}
     >
-      {/* Interleave left and right cubes for better visual flow */}
       {leftProjects.map((project, index) => (
         <div key={`row-${index}`} style={{ display: 'flex', gap: '40px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Cube project={leftProjects[index]} side="left" index={index} />
+          <Cube
+            project={leftProjects[index]}
+            side="left"
+            index={index}
+            cubeIndex={index * 2}
+            accentRGB={ACCENT_PALETTE[index]}
+          />
           {rightProjects[index] && (
-            <Cube project={rightProjects[index]} side="right" index={index} />
+            <Cube
+              project={rightProjects[index]}
+              side="right"
+              index={index}
+              cubeIndex={index * 2 + 1}
+              accentRGB={ACCENT_PALETTE[6 + index]}
+            />
           )}
         </div>
       ))}

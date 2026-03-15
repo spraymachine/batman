@@ -31,8 +31,9 @@ export default function Moon3D({ position = [0, 0, 0], scale = 1 }) {
   });
 
   // Process OBJ model and apply textures
-  const processedModel = useMemo(() => {
+  const { model: processedModel, halfHeight: normalizedHalfHeight } = useMemo(() => {
     const model = obj.clone();
+    let halfHeight = 0.5;
 
     // Configure textures
     diffuseTexture.colorSpace = THREE.SRGBColorSpace;
@@ -48,6 +49,7 @@ export default function Moon3D({ position = [0, 0, 0], scale = 1 }) {
     if (maxDim > 0) {
       const normalizeScale = 1 / maxDim;
       model.scale.multiplyScalar(normalizeScale);
+      halfHeight = (size.y * normalizeScale) / 2;
     }
 
     // Center the model
@@ -94,20 +96,22 @@ export default function Moon3D({ position = [0, 0, 0], scale = 1 }) {
       }
     });
 
-    return model;
+    return { model, halfHeight };
   }, [obj, diffuseTexture, bumpTexture]);
 
   // Expose ref to window for GSAP scroll animations
   useEffect(() => {
     if (groupRef.current) {
       window.moon3DRef = groupRef.current;
+      window.moon3DHalfHeight = normalizedHalfHeight;
     }
     return () => {
       if (window.moon3DRef === groupRef.current) {
         delete window.moon3DRef;
+        delete window.moon3DHalfHeight;
       }
     };
-  }, []);
+  }, [normalizedHalfHeight]);
 
   return (
     <group ref={groupRef} position={position} scale={scale}>

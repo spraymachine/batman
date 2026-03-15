@@ -10,15 +10,15 @@ import Moon3D from './Moon3D';
 function LoadingFallback() {
   return (
     <>
-      {/* Sun placeholder - glowing sphere */}
-      <group position={[-2, 3, 0]}>
+      {/* Sun placeholder - beside landing text (y=0) */}
+      <group position={[-2, 0, 0]}>
         <mesh>
           <sphereGeometry args={[0.3, 16, 16]} />
           <meshStandardMaterial color="#ffd700" emissive="#ff6b35" emissiveIntensity={0.5} />
         </mesh>
       </group>
-      {/* Moon placeholder - grey sphere */}
-      <group position={[2, 3, 0]}>
+      {/* Moon placeholder - beside landing text (y=0) */}
+      <group position={[2, 0, 0]}>
         <mesh>
           <sphereGeometry args={[0.3, 16, 16]} />
           <meshStandardMaterial color="#c0c0c0" emissive="#909090" emissiveIntensity={0.3} />
@@ -87,11 +87,11 @@ export default function Scene3D() {
 
       {/* Suspense boundary - shows fallback while models load */}
       <Suspense fallback={<LoadingFallback />}>
-        {/* Sun 3D Model - Start left, above viewport */}
-        <Sun3D position={[-2, 3, 0]} scale={1} />
+        {/* Sun 3D Model - Start left, beside landing text (y=0) */}
+        <Sun3D position={[-2, 0, 0]} scale={1} />
 
-        {/* Moon 3D Model - Start right, above viewport */}
-        <Moon3D position={[2, 3, 0]} scale={1} />
+        {/* Moon 3D Model - Start right, beside landing text (y=0) */}
+        <Moon3D position={[2, 0, 0]} scale={1} />
       </Suspense>
     </Canvas>
   );

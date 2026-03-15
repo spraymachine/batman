@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import Lenis from '@studio-freight/lenis';
 import './styles/globals.css';
 import './styles/mobile.css';
+import './styles/cubes.css';
 
 // Import components - SPACE THEME
 import Starfield from './components/Starfield';
