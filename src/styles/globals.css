@@ -55,6 +55,12 @@
   --sidebar-ring: oklch(0.709 0.01 56.259);
 }
 
+/* ── Experience Selector ── */
+@keyframes selectorTwinkle {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.85; }
+}
+
 /* Global Reset & Base Styles */
 * {
   margin: 0;

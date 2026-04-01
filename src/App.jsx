@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Lenis from '@studio-freight/lenis';
 import './styles/globals.css';
 import './styles/mobile.css';
@@ -8,6 +8,7 @@ import './styles/cubes.css';
 import Starfield from './components/Starfield';
 import Scene3D from './components/Scene3D';
 import ErrorBoundary from './components/ErrorBoundary';
+import ExperienceSelector from './components/ExperienceSelector';
 
 // Import sections
 import Landing from './sections/Landing';
@@ -19,12 +20,11 @@ import Contact from './sections/Contact';
 import useScrollAnimations from './hooks/useScrollAnimations';
 
 /**
- * Main App Component
- * Mobile-first, scroll-driven 3D portfolio
- * Tech: React + GSAP + ScrollTrigger + Lenis + Tailwind
+ * Space Experience
+ * The existing scroll-driven 3D portfolio, now wrapped so it can be
+ * conditionally rendered after the selector screen.
  */
-function App() {
-  // Initialize Lenis smooth scroll
+function SpaceExperience() {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -33,63 +33,57 @@ function App() {
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1,
-      smoothTouch: false, // Disable on touch for better mobile performance
+      smoothTouch: false,
       touchMultiplier: 2,
       infinite: false,
     });
 
-    // Sync Lenis with GSAP ScrollTrigger
     function raf(time) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
 
-    // Cleanup
-    return () => {
-      lenis.destroy();
-    };
+    return () => lenis.destroy();
   }, []);
 
-  // Initialize all scroll animations
   useScrollAnimations();
 
   return (
     <div className="app">
-      {/* Space Background Effects */}
       <Starfield />
-      {/* Northern Lights removed for clear night sky */}
-
-      {/* Main Sections - Scroll is the navigation */}
       <main style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
         <Landing />
         <Portfolio />
         <About />
         <Contact />
       </main>
-      
-      {/* Global Scroll Elements - 3D Sun and Moon (rendered AFTER main for proper z-index stacking) */}
       <ErrorBoundary>
         <Scene3D />
       </ErrorBoundary>
+    </div>
+  );
+}
 
-      {/* Performance indicator - remove in production */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '10px',
-          right: '10px',
-          fontSize: '10px',
-          color: 'var(--aurora-green)',
-          opacity: 0.5,
-          zIndex: 9999,
-          pointerEvents: 'none',
-          fontFamily: 'monospace',
-        }}
-      >
-        Scroll-driven 🌌
-      </div>
-      </div>
+/**
+ * Main App Component
+ * Shows the experience selector first; once the user picks one,
+ * renders the corresponding experience.
+ */
+function App() {
+  const [experience, setExperience] = useState(null);
+
+  return (
+    <>
+      {/* Selector is always present until an experience is chosen */}
+      {!experience && (
+        <ExperienceSelector onSelect={(id) => setExperience(id)} />
+      )}
+
+      {/* Render the chosen experience */}
+      {experience === 'space' && <SpaceExperience />}
+      {/* experience === 'max' and experience === 'min' will go here later */}
+    </>
   );
 }
 
