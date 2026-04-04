@@ -1,30 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Lenis from '@studio-freight/lenis';
 import './styles/globals.css';
 import './styles/mobile.css';
 import './styles/cubes.css';
 
-// Import components - SPACE THEME
 import Starfield from './components/Starfield';
 import Scene3D from './components/Scene3D';
 import ErrorBoundary from './components/ErrorBoundary';
 import ExperienceSelector from './components/ExperienceSelector';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import MaximalistExperience from './experiences/maximalist/MaximalistExperience';
+import MinimalistExperience from './experiences/minimalist/MinimalistExperience';
 
-// Import sections
 import Landing from './sections/Landing';
 import Portfolio from './sections/Portfolio';
 import About from './sections/About';
 import Contact from './sections/Contact';
 
-// Import custom hook
 import useScrollAnimations from './hooks/useScrollAnimations';
+import { useRoute } from './hooks/useRoute';
 
-/**
- * Space Experience
- * The existing scroll-driven 3D portfolio, now wrapped so it can be
- * conditionally rendered after the selector screen.
- */
-function SpaceExperience() {
+function SpaceExperience({ navigate }) {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -61,30 +57,18 @@ function SpaceExperience() {
       <ErrorBoundary>
         <Scene3D />
       </ErrorBoundary>
+      <ThemeSwitcher current="/space" navigate={navigate} />
     </div>
   );
 }
 
-/**
- * Main App Component
- * Shows the experience selector first; once the user picks one,
- * renders the corresponding experience.
- */
 function App() {
-  const [experience, setExperience] = useState(null);
+  const { route, navigate } = useRoute();
 
-  return (
-    <>
-      {/* Selector is always present until an experience is chosen */}
-      {!experience && (
-        <ExperienceSelector onSelect={(id) => setExperience(id)} />
-      )}
-
-      {/* Render the chosen experience */}
-      {experience === 'space' && <SpaceExperience />}
-      {/* experience === 'max' and experience === 'min' will go here later */}
-    </>
-  );
+  if (route === '/space') return <SpaceExperience navigate={navigate} />;
+  if (route === '/max')   return <MaximalistExperience navigate={navigate} />;
+  if (route === '/min')   return <MinimalistExperience navigate={navigate} />;
+  return <ExperienceSelector navigate={navigate} />;
 }
 
 export default App;

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  * Clicking "SPACE" transitions into the existing space portfolio.
  * The other two cards are placeholders (coming soon).
  */
-export default function ExperienceSelector({ onSelect }) {
+export default function ExperienceSelector({ navigate }) {
   const [mounted, setMounted] = useState(false);
   const [exiting, setExiting] = useState(false);
 
@@ -17,9 +17,9 @@ export default function ExperienceSelector({ onSelect }) {
   }, []);
 
   function handleSelect(id) {
-    if (id !== 'space') return; // only space is wired up
+    if (!['space', 'max', 'min'].includes(id)) return;
     setExiting(true);
-    setTimeout(() => onSelect(id), 900);
+    setTimeout(() => navigate(`/${id}`), 900);
   }
 
   return (
@@ -36,8 +36,8 @@ export default function ExperienceSelector({ onSelect }) {
       {/* Cards */}
       <div style={styles.grid(mounted)}>
         <SpaceCard onClick={() => handleSelect('space')} />
-        <MaximalisticCard />
-        <MinimalisticCard />
+        <MaximalisticCard onClick={() => handleSelect('max')} />
+        <MinimalisticCard onClick={() => handleSelect('min')} />
       </div>
 
       {/* Footer hint */}
@@ -91,15 +91,16 @@ function SpaceCard({ onClick }) {
 }
 
 /* ─── MAXIMALISTIC CARD ──────────────────────────────────────── */
-function MaximalisticCard() {
+function MaximalisticCard({ onClick }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
+    <button
       style={styles.card(hovered, 'max')}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      aria-label="Maximalistic experience — coming soon"
+      onClick={onClick}
+      aria-label="Enter Maximalist experience"
     >
       {/* Bold gradient background */}
       <div style={styles.maxBg} />
@@ -107,7 +108,7 @@ function MaximalisticCard() {
 
       {/* Geometric decoration */}
       <div style={styles.maxHexRow}>
-        {['#00d4ff', '#00ff87', '#7ec8e3', '#00ff87', '#c0c0c0'].map((c, i) => (
+        {['#2a31ff', '#60d35e', '#eaebff', '#60d35e', '#2a31ff'].map((c, i) => (
           <div key={i} style={styles.maxHex(c, i, hovered)} />
         ))}
       </div>
@@ -116,27 +117,30 @@ function MaximalisticCard() {
       <div style={styles.cardLabel}>
         <p style={styles.cardTag('max')}>02</p>
         <h2 style={styles.cardTitle('max', hovered)}>MAXIMAL</h2>
-        <p style={styles.cardDesc('max')}>Bold · Dense · Electric</p>
+        <p style={styles.cardDesc('max')}>Brutalist · Bold · Electric</p>
       </div>
 
-      {/* Coming soon badge */}
-      <div style={styles.comingSoon('max')}>COMING SOON</div>
+      {/* Enter arrow */}
+      <div style={styles.enterArrowMax(hovered)}>
+        ENTER →
+      </div>
 
       <div style={styles.cardBorder('max', hovered)} />
-    </div>
+    </button>
   );
 }
 
 /* ─── MINIMALISTIC CARD ──────────────────────────────────────── */
-function MinimalisticCard() {
+function MinimalisticCard({ onClick }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
+    <button
       style={styles.card(hovered, 'min')}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      aria-label="Minimalistic experience — coming soon"
+      onClick={onClick}
+      aria-label="Enter Minimalist experience"
     >
       {/* Clean white background */}
       <div style={styles.minBg} />
@@ -158,11 +162,13 @@ function MinimalisticCard() {
         <p style={styles.cardDesc('min')}>Clean · Still · Type-first</p>
       </div>
 
-      {/* Coming soon badge */}
-      <div style={styles.comingSoon('min')}>COMING SOON</div>
+      {/* Enter arrow */}
+      <div style={styles.enterArrowMin(hovered)}>
+        ENTER →
+      </div>
 
       <div style={styles.cardBorder('min', hovered)} />
-    </div>
+    </button>
   );
 }
 
@@ -213,7 +219,8 @@ const styles = {
     transition: 'opacity 0.8s ease, transform 0.8s ease',
     opacity: exiting ? 0 : 1,
     transform: exiting ? 'scale(1.04)' : 'scale(1)',
-    overflow: 'hidden',
+    overflowX: 'hidden',
+    overflowY: 'auto',
   }),
 
   ambientGlow: {
@@ -260,7 +267,7 @@ const styles = {
     transition: 'opacity 0.9s ease 0.2s, transform 0.9s ease 0.2s',
     opacity: mounted ? 1 : 0,
     transform: mounted ? 'translateY(0)' : 'translateY(30px)',
-    flexWrap: 'nowrap',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     width: '100%',
     maxWidth: '1100px',
@@ -278,12 +285,12 @@ const styles = {
 
   /* Card base */
   card: (hovered, variant) => {
-    const cursors = { space: 'pointer', max: 'default', min: 'default' };
+    const cursors = { space: 'pointer', max: 'pointer', min: 'pointer' };
     return {
       position: 'relative',
-      width: 'clamp(0px, 30vw, 320px)',
-      flex: '1 1 0',
-      height: 'clamp(300px, 48vh, 460px)',
+      width: 'clamp(240px, 30vw, 320px)',
+      flex: '1 1 auto',
+      height: 'clamp(260px, 40vh, 460px)',
       borderRadius: '12px',
       overflow: 'hidden',
       cursor: cursors[variant],
@@ -362,7 +369,7 @@ const styles = {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(135deg, #020d1a 0%, #041428 30%, #031a0e 70%, #020d1a 100%)',
+      'linear-gradient(135deg, #08081a 0%, #0e1040 30%, #081a10 70%, #08081a 100%)',
   },
 
   maxGrid: (hovered) => ({
@@ -488,6 +495,34 @@ const styles = {
     fontSize: '0.65rem',
     letterSpacing: '0.15em',
     color: '#00ff87',
+    opacity: hovered ? 1 : 0,
+    transform: hovered ? 'translateX(0)' : 'translateX(-6px)',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+    zIndex: 4,
+  }),
+
+  enterArrowMin: (hovered) => ({
+    position: 'absolute',
+    top: 'clamp(0.75rem, 1.5vw, 1rem)',
+    right: 'clamp(0.75rem, 1.5vw, 1rem)',
+    fontFamily: 'monospace',
+    fontSize: '0.65rem',
+    letterSpacing: '0.15em',
+    color: '#111',
+    opacity: hovered ? 1 : 0,
+    transform: hovered ? 'translateX(0)' : 'translateX(-6px)',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+    zIndex: 4,
+  }),
+
+  enterArrowMax: (hovered) => ({
+    position: 'absolute',
+    top: 'clamp(0.75rem, 1.5vw, 1rem)',
+    right: 'clamp(0.75rem, 1.5vw, 1rem)',
+    fontFamily: 'monospace',
+    fontSize: '0.65rem',
+    letterSpacing: '0.15em',
+    color: '#60d35e',
     opacity: hovered ? 1 : 0,
     transform: hovered ? 'translateX(0)' : 'translateX(-6px)',
     transition: 'opacity 0.3s ease, transform 0.3s ease',

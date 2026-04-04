@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════════════════════
+   MINIMALIST DESIGN SYSTEM — B/W
+   Less is more. Every pixel earns its place.
+   ═══════════════════════════════════════════════════════════════ */
+
+.min-experience {
+  --min-black: #111111;
+  --min-white: #fafafa;
+  --min-grey-1: #888888;
+  --min-grey-2: #cccccc;
+  --min-grey-3: #e8e8e8;
+  --min-grey-4: #f2f2f2;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  font-family: var(--font-sans);
+  background: var(--min-white);
+  color: var(--min-black);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography ── */
+.min-experience h1,
+.min-experience h2,
+.min-experience h3 {
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.min-experience .mono {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--min-grey-1);
+}
+
+/* ── Scrollbar ── */
+.min-experience::-webkit-scrollbar {
+  width: 4px;
+}
+.min-experience::-webkit-scrollbar-track {
+  background: var(--min-white);
+}
+.min-experience::-webkit-scrollbar-thumb {
+  background: var(--min-grey-2);
+}
+
+/* ── Selection ── */
+.min-experience ::selection {
+  background: var(--min-black);
+  color: var(--min-white);
+}
+
+/* ── Minimal link ── */
+.min-link {
+  position: relative;
+  color: var(--min-black);
+  text-decoration: none;
+  display: inline-block;
+}
+.min-link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--min-black);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.min-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ── Reveal animation ── */
+@keyframes minFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Horizontal rule ── */
+.min-hr {
+  width: 100%;
+  height: 1px;
+  background: var(--min-grey-3);
+  border: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .min-experience {
+    line-height: 1.6;
+  }
+
+  .min-link::after {
+    transform: scaleX(1);
+    opacity: 0.3;
+  }
+}

@@ -3,14 +3,14 @@
   "configurations": [
     {
       "name": "vite-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "PATH=/usr/local/bin:$PATH npx vite --port 5173"],
       "port": 5173
     },
     {
       "name": "vite-preview",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "PATH=/usr/local/bin:$PATH npx vite preview --port 4173"],
       "port": 4173
     }
   ]

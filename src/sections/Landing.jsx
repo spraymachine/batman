@@ -95,7 +95,7 @@ export default function Landing() {
           style={{
             fontSize: 'clamp(2.5rem, 8vw, 5rem)',
             fontWeight: '700',
-            color: 'var(--silver-white)',
+            color: 'var(--aurora-green)',
             marginBottom: '20px',
             lineHeight: '1.2',
             textShadow: '0 0 20px rgba(0, 255, 135, 0.5), 0 0 40px rgba(0, 212, 255, 0.3)',
@@ -108,7 +108,7 @@ export default function Landing() {
           id="landing-subheading"
           style={{
             fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-            color: 'var(--silver-white)',
+            color: 'var(--aurora-green)',
             opacity: 0.8,
             fontWeight: '400',
             lineHeight: '1.6',
