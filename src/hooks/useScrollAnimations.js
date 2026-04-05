@@ -247,14 +247,23 @@ export default function useScrollAnimations() {
             const worldWidth = worldHeight * aspect;
             const maxX = worldWidth / 2 - 0.15; // margin from edge
             const isMobile = vw <= 768;
-            const sunX = isMobile ? -Math.min(maxX, 1.1) : -2.5;
-            const moonX = isMobile ? Math.min(maxX, 1.1) : 2.5;
-            const sunStartX = isMobile ? -1.1 : -2;
-            const moonStartX = isMobile ? 1.1 : 2;
+            // Push planets further out on mobile so they don't block content
+            const sunX = isMobile ? -Math.min(maxX, 1.6) : -2.5;
+            const moonX = isMobile ? Math.min(maxX, 1.6) : 2.5;
+            const sunStartX = isMobile ? -1.3 : -2;
+            const moonStartX = isMobile ? 1.3 : 2;
             return { sunStartX, moonStartX, sunX, moonX };
           };
 
           const prefersReducedMotionPlanets = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+
+          // Mobile: scale planets down so they don't dominate the narrow viewport
+          const isMobilePlanets = viewportWidth <= 768;
+          const mobileInitialScale = isMobilePlanets ? 0.65 : 1;
+          if (isMobilePlanets) {
+            gsap.set(sun3D.scale, { x: mobileInitialScale, y: mobileInitialScale, z: mobileInitialScale });
+            gsap.set(moon3D.scale, { x: mobileInitialScale, y: mobileInitialScale, z: mobileInitialScale });
+          }
 
           // Set initial positions: beside landing text (y=0), no off-screen start
           const initPos = getPlanetLandingPositions();
@@ -368,10 +377,24 @@ export default function useScrollAnimations() {
           // ============================================
           
           // ============================================
-          // 3. PORTFOLIO SECTION - Keep Sun/Moon in position
+          // 3. PORTFOLIO SECTION - Drift Sun/Moon down on mobile
           // ============================================
-          // Sun and Moon stay in their positions during portfolio scroll
-          // (No animation needed here, they maintain position from Landing)
+          // On mobile the planets block portfolio cubes when stuck at y=0.
+          // Gently lower them during portfolio scroll so content stays readable.
+          if (isMobilePlanets) {
+            const portfolioDrift = gsap.timeline({
+              scrollTrigger: {
+                trigger: '#portfolio',
+                start: 'top 80%',
+                end: 'bottom 80%',
+                scrub: 1,
+                invalidateOnRefresh: true,
+                markers: false,
+              },
+            });
+            portfolioDrift.to(sun3D.position, { y: -1.2, ease: 'none' }, 0);
+            portfolioDrift.to(moon3D.position, { y: -1.2, ease: 'none' }, 0);
+          }
           
           // ============================================
           // 4. ABOUT SECTION - Sun & Moon Converge to Image Center + EXPAND
@@ -455,8 +478,8 @@ export default function useScrollAnimations() {
             };
 
             const getAboutScale = () => {
-              if (window.innerWidth <= 480) return 0.48;
-              if (window.innerWidth <= 768) return 0.55;
+              if (window.innerWidth <= 480) return 0.55;
+              if (window.innerWidth <= 768) return 0.6;
               return 0.8;
             };
 
@@ -469,7 +492,8 @@ export default function useScrollAnimations() {
                 const { leftWorld, rightWorld } = getAboutTargets();
                 const scale = getAboutScale();
                 const landingPositions = getPlanetLandingPositions();
-                const currentScale = gsap.utils.interpolate(1, scale, aboutState.progress);
+                const baseScale = isMobilePlanets ? mobileInitialScale : 1;
+                const currentScale = gsap.utils.interpolate(baseScale, scale, aboutState.progress);
 
                 gsap.set(sun3D.position, {
                   x: gsap.utils.interpolate(landingPositions.sunX, leftWorld.x, aboutState.progress),
