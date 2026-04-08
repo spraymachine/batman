@@ -11,8 +11,9 @@ import * as THREE from 'three';
  */
 
 // Use Vite base path for model URLs
-const OBJ_PATH = `${import.meta.env.BASE_URL}models/moon/Moon 2K.obj`;
-const MTL_PATH = `${import.meta.env.BASE_URL}models/moon/Moon 2K.mtl`;
+// Encode spaces so GitHub Pages static servers handle paths correctly
+const OBJ_PATH = `${import.meta.env.BASE_URL}models/moon/Moon%202K.obj`;
+const MTL_PATH = `${import.meta.env.BASE_URL}models/moon/Moon%202K.mtl`;
 const DIFFUSE_TEXTURE = `${import.meta.env.BASE_URL}models/moon/Textures/Diffuse_2K.png`;
 const BUMP_TEXTURE = `${import.meta.env.BASE_URL}models/moon/Textures/Bump_2K.png`;
 

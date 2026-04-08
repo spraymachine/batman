@@ -49,11 +49,6 @@
     margin-bottom: 16px;
   }
 
-  /* Optimize sticky positioning */
-  .preserve-3d {
-    transform-style: flat;
-  }
-
   /* Portfolio section mobile adjustments */
   #portfolio {
     padding: 60px 20px 100px 20px !important; /* Reduced top/side padding, kept bottom padding */
@@ -171,10 +166,8 @@
     min-height: 44px;
   }
 
-  /* Disable 3D transforms on touch for better performance */
-  .preserve-3d {
-    transform-style: flat;
-  }
+  /* NOTE: Do NOT override transform-style here — it breaks CSS 3D cube faces
+     and prevents GSAP scroll-driven rotations from being visible on mobile. */
 }
 
 /* High-performance mode for low-end devices */
@@ -186,11 +179,6 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  /* Disable 3D transforms */
-  .preserve-3d {
-    transform-style: flat;
   }
 
   /* Disable filters */

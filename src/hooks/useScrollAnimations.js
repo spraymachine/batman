@@ -342,33 +342,42 @@ export default function useScrollAnimations() {
             const SPIN_DURATION = 1.6;
             const TWO_ROTATIONS = Math.PI * 4;
 
-            const onFirstScroll = () => {
+            const triggerSpin = () => {
               if (spinTriggered) return;
-              if (window.scrollY > 5) {
-                spinTriggered = true;
-                if (scrollListenerCleanup) {
-                  scrollListenerCleanup();
-                  scrollListenerCleanup = null;
-                }
-
-                gsap.to(sun3D.rotation, {
-                  y: `+=${TWO_ROTATIONS}`,
-                  duration: SPIN_DURATION,
-                  ease: 'power2.inOut',
-                  overwrite: 'auto',
-                });
-                gsap.to(moon3D.rotation, {
-                  y: `+=${-TWO_ROTATIONS}`,
-                  duration: SPIN_DURATION,
-                  ease: 'power2.inOut',
-                  overwrite: 'auto',
-                });
-
-                gsap.delayedCall(SPIN_DURATION, startPositionTimeline);
+              spinTriggered = true;
+              if (scrollListenerCleanup) {
+                scrollListenerCleanup();
+                scrollListenerCleanup = null;
               }
+
+              gsap.to(sun3D.rotation, {
+                y: `+=${TWO_ROTATIONS}`,
+                duration: SPIN_DURATION,
+                ease: 'power2.inOut',
+                overwrite: 'auto',
+              });
+              gsap.to(moon3D.rotation, {
+                y: `+=${-TWO_ROTATIONS}`,
+                duration: SPIN_DURATION,
+                ease: 'power2.inOut',
+                overwrite: 'auto',
+              });
+
+              gsap.delayedCall(SPIN_DURATION, startPositionTimeline);
             };
-            scrollListenerCleanup = () => window.removeEventListener('scroll', onFirstScroll);
-            window.addEventListener('scroll', onFirstScroll, { passive: true });
+
+            // Race condition fix: if models loaded after user already scrolled
+            // (common on slow mobile connections), skip the spin and go straight
+            // to the position timeline so planets animate correctly.
+            if (window.scrollY > 5) {
+              startPositionTimeline();
+            } else {
+              const onFirstScroll = () => {
+                if (window.scrollY > 5) triggerSpin();
+              };
+              scrollListenerCleanup = () => window.removeEventListener('scroll', onFirstScroll);
+              window.addEventListener('scroll', onFirstScroll, { passive: true });
+            }
           }
           
           // ============================================

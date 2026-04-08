@@ -89,29 +89,69 @@ export default function Landing() {
           opacity: 0,
         }}
       >
+        {/* Orbital ring decoration */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 'clamp(280px, 55vw, 480px)',
+          height: 'clamp(280px, 55vw, 480px)',
+          borderRadius: '50%',
+          border: '1px solid rgba(0, 212, 255, 0.08)',
+          pointerEvents: 'none',
+          zIndex: -1,
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%) rotate(30deg)',
+          width: 'clamp(360px, 70vw, 620px)',
+          height: 'clamp(200px, 38vw, 340px)',
+          borderRadius: '50%',
+          border: '1px solid rgba(183, 148, 246, 0.06)',
+          pointerEvents: 'none',
+          zIndex: -1,
+        }} />
+
         <h1
           ref={headingRef}
           id="landing-heading"
           style={{
             fontSize: 'clamp(2.5rem, 8vw, 5rem)',
             fontWeight: '700',
-            color: 'var(--aurora-green)',
+            color: 'var(--silver-white)',
             marginBottom: '20px',
             lineHeight: '1.2',
-            textShadow: '0 0 20px rgba(0, 255, 135, 0.5), 0 0 40px rgba(0, 212, 255, 0.3)',
+            textShadow: '0 0 40px rgba(232, 244, 248, 0.15)',
+            letterSpacing: '-0.01em',
           }}
         >
           Hi, I'm <span id="landing-name">Mani</span>
         </h1>
+
+        {/* Divider line with gradient */}
+        <div style={{
+          width: 'clamp(60px, 12vw, 100px)',
+          height: '1px',
+          margin: '0 auto 20px',
+          background: 'linear-gradient(90deg, transparent, var(--aurora-blue), var(--aurora-purple), transparent)',
+          opacity: 0.6,
+        }} />
+
         <p
           ref={subheadingRef}
           id="landing-subheading"
           style={{
-            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-            color: 'var(--aurora-green)',
-            opacity: 0.8,
-            fontWeight: '400',
+            fontSize: 'clamp(0.75rem, 1.5vw, 0.95rem)',
+            color: 'var(--aurora-blue)',
+            opacity: 0.9,
+            fontWeight: '500',
             lineHeight: '1.6',
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            textShadow: '0 0 20px rgba(0, 212, 255, 0.4)',
           }}
         >
           coding EXPERIENCES
