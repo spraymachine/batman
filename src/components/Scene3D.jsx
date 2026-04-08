@@ -45,15 +45,21 @@ export default function Scene3D() {
         pointerEvents: 'none',
       }}
       camera={{ position: [0, 0, 5], fov: 50 }}
+      // Cap DPR so high-DPI mobile screens (3x) don't render at 9x pixel count.
+      // This is the single biggest mobile perf win for the planet scene.
+      dpr={[1, 1.5]}
+      frameloop="always"
+      performance={{ min: 0.5 }}
       onCreated={({ gl, scene }) => {
         gl.setClearColor(0x000000, 0);
         gl.setClearAlpha(0);
         scene.background = null;
       }}
       gl={{
-        antialias: true,
+        antialias: window.innerWidth > 768, // disable AA on mobile
         alpha: true,
         premultipliedAlpha: false,
+        powerPreference: 'high-performance',
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.2,
       }}

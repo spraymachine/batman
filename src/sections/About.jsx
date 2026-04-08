@@ -56,6 +56,8 @@ export default function About() {
       </div>
 
       {/* About Me Image */}
+      {/* z-index must beat Scene3D Canvas (99999) so the picture isn't hidden
+          when the planets converge over it on mobile. */}
       <div
         id="about-image"
         className="about-image"
@@ -64,7 +66,7 @@ export default function About() {
           height: '500px',
           overflow: 'hidden',
           position: 'relative',
-          zIndex: 1,
+          zIndex: 100000,
         }}
       >
         <img

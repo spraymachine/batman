@@ -890,22 +890,23 @@ export default function useScrollAnimations() {
           const aboutImageEl = document.querySelector('.about-image');
           
           if (aboutImageEl) {
+            // Keep image always visible (no opacity 0 init) — just a subtle scale-in.
+            // Previously the opacity tween could leave the image hidden on mobile if
+            // the scrub trigger timing got starved by Lenis on slow devices.
             gsap.fromTo(
               aboutImageEl,
               {
-                scale: 0.8,
-                opacity: 0,
-                rotateY: -20,
+                scale: 0.92,
+                rotateY: -10,
               },
               {
                 scale: 1,
-                opacity: 1,
                 rotateY: 0,
                 ease: 'power2.out',
                 scrollTrigger: {
                   trigger: '#about',
-                  start: 'top 60%',
-                  end: 'top 30%',
+                  start: 'top 80%',
+                  end: 'top 40%',
                   scrub: true,
                   markers: false,
                 },
