@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { LaserFlow } from '../components/LaserFlow';
+import { SparklesCore } from '../components/SparklesCore';
 
 /**
  * Landing Section - SPACE THEME
@@ -24,6 +25,26 @@ export default function Landing() {
         overflow: 'hidden',
       }}
     >
+      {/* Sparkles background — full section */}
+      <SparklesCore
+        id="landing-sparkles"
+        background="transparent"
+        minSize={0.4}
+        maxSize={1.4}
+        particleDensity={90}
+        particleColor="#ffffff"
+        speed={1.2}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }}
+        className="absolute inset-0 w-full h-full"
+      />
+
       {/* LaserFlow - Bottom corners */}
       <div
         aria-hidden="true"

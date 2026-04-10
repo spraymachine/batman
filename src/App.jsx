@@ -4,7 +4,6 @@ import './styles/globals.css';
 import './styles/mobile.css';
 import './styles/cubes.css';
 
-import Starfield from './components/Starfield';
 import Scene3D from './components/Scene3D';
 import ErrorBoundary from './components/ErrorBoundary';
 import ExperienceSelector from './components/ExperienceSelector';
@@ -47,7 +46,6 @@ function SpaceExperience({ navigate }) {
 
   return (
     <div className="app">
-      <Starfield />
       <main style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
         <Landing />
         <Portfolio />
